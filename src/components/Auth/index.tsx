@@ -2,6 +2,13 @@ import { Button, Center, Image, Input, Stack, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import React, { useState } from "react";
+import UserOperations from "@/graphql/operations/user";
+import { useMutation } from "@apollo/client";
+import type {
+  CreateUsernameData,
+  CreateUsernameVariables,
+} from "@/utils/types";
+import { toast } from "react-hot-toast";
 
 type IAuthProps = {
   session: Session | null;
@@ -11,14 +18,40 @@ type IAuthProps = {
 const Auth = ({ reloadSession, session }: IAuthProps) => {
   const [username, setUsername] = useState("");
 
+  const [createUsername, { loading, error }] = useMutation<
+    CreateUsernameData,
+    CreateUsernameVariables
+  >(UserOperations.Mutations.createUsername);
+  console.log(
+    "🚀 ~ file: index.tsx:21 ~ Auth ~ loading, error",
+    loading,
+    error
+  );
+
   const onSubmit = async () => {
+    if (!username) return;
     try {
-      console.log(username);
+      const { data } = await createUsername({ variables: { username } });
+
+      if (!data?.createUsername) {
+        throw new Error("");
+      }
+
+      if (data.createUsername.error) {
+        const {
+          createUsername: { error },
+        } = data;
+        throw new Error(error);
+      }
+
+      toast.success(`Welcom ${username}! 🎉`);
 
       /**
-       * Create username mutation
+       * Reload session to ontain the new username
        */
-    } catch (error) {
+      reloadSession();
+    } catch (error: any) {
+      toast.error(error.message);
       console.log("🚀 ~ file: index.tsx:18 ~ onSubmit ~ error", error);
     }
   };

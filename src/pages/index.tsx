@@ -9,7 +9,10 @@ export default function Home() {
   const { data: session } = useSession();
   console.log("🚀 ~ file: index.tsx:6 ~ Home ~ data", session);
 
-  const reloadSession = () => {};
+  const reloadSession = () => {
+    const event = new Event("visibilitychange");
+    document.dispatchEvent(event);
+  };
   return (
     <Box>
       {session?.user.username ? (
