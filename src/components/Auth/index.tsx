@@ -44,7 +44,7 @@ const Auth = ({ reloadSession, session }: IAuthProps) => {
         throw new Error(error);
       }
 
-      toast.success(`Welcom ${username}! 🎉`);
+      toast.success(`Welcome ${username}! 🎉`);
 
       /**
        * Reload session to ontain the new username
@@ -66,7 +66,7 @@ const Auth = ({ reloadSession, session }: IAuthProps) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <Button width="100%" onClick={onSubmit}>
+            <Button width="100%" onClick={onSubmit} isLoading={loading}>
               Save
             </Button>
           </>

@@ -16,7 +16,10 @@ export default function Home() {
   return (
     <Box>
       {session?.user.username ? (
-        <Chat />
+        <>
+          {session.user.username}
+          <Chat />
+        </>
       ) : (
         <Auth session={session} reloadSession={reloadSession} />
       )}
