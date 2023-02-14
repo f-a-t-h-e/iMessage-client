@@ -1,4 +1,4 @@
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
   Button,
   ModalOverlay,
@@ -11,15 +11,19 @@ import {
   Input,
 } from "@chakra-ui/react";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import UserOperations from "@/graphql/operations/user";
 import {
+  ICreateConversationData,
+  ICreateConversationInput,
   ISearchedUser,
   ISearchUserData,
   ISearchUserInput,
 } from "@/utils/types";
 import UsersSearchList from "./UsersSearchList";
 import Participants from "./Participants";
+import { toast } from "react-hot-toast";
+import ConversationOperations from "@/graphql/operations/conversation";
 
 type IModalProps = {
   isOpen: boolean;
@@ -29,10 +33,15 @@ type IModalProps = {
 const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<ISearchedUser[]>([]);
+
   const [searchUsers, { data, error, loading }] = useLazyQuery<
     ISearchUserData,
     ISearchUserInput
   >(UserOperations.Queries.searchUsers);
+  const [createConversation, { loading: isCreateloading }] = useMutation<
+    ICreateConversationData,
+    ICreateConversationInput
+  >(ConversationOperations.Mutations.createConversation);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     // searchUsers query
@@ -45,6 +54,7 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
   const onRemoveParticipant = (userId: string) => {
     setParticipants((prev) => prev.filter(({ id }) => id !== userId));
   };
+
   const onAddParticipant = (user: ISearchedUser) => {
     /* HINT : This filter function is to prevent duplication
      * when adding the same user
@@ -59,6 +69,17 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
     });
   };
 
+  const onCreateConversation = async () => {
+    try {
+      const { data, errors } = await createConversation({
+        variables: { participantIds: participants.map((parti) => parti.id) },
+      });
+      data?.createConversation.conversationId;
+    } catch (error: any) {
+      console.log("🚀 onCreateConversation ~ error", error);
+      toast.error(error && error.message);
+    }
+  };
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -97,6 +118,8 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
                   w="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
+                  isLoading={isCreateloading}
+                  onClick={onCreateConversation}
                 >
                   Create Conversation
                 </Button>
