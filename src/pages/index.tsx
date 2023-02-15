@@ -7,7 +7,6 @@ import { Session } from "next-auth";
 
 export default function Home() {
   const { data: session } = useSession();
-  console.log("🚀 ~ file: index.tsx:6 ~ Home ~ data", session);
 
   const reloadSession = () => {
     const event = new Event("visibilitychange");
