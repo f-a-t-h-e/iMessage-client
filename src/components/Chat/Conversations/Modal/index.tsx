@@ -24,6 +24,7 @@ import UsersSearchList from "./UsersSearchList";
 import Participants from "./Participants";
 import { toast } from "react-hot-toast";
 import ConversationOperations from "@/graphql/operations/conversation";
+import { useRouter } from "next/router";
 
 type IModalProps = {
   isOpen: boolean;
@@ -43,10 +44,11 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
     ICreateConversationInput
   >(ConversationOperations.Mutations.createConversation);
 
+  const router = useRouter();
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     // searchUsers query
     e.preventDefault();
-    console.log("Click");
 
     searchUsers({ variables: { username } });
   };
@@ -72,9 +74,26 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
   const onCreateConversation = async () => {
     try {
       const { data, errors } = await createConversation({
+        // Adding the current user is done by the backend
         variables: { participantIds: participants.map((parti) => parti.id) },
       });
-      data?.createConversation.conversationId;
+
+      /* NOTE : this is not required due to the validation in the backend schema */
+      if (!data?.createConversation) {
+        throw new Error("Failed to create conversation");
+      }
+
+      const { conversationId } = data.createConversation;
+
+      router.push({ query: { conversationId } });
+
+      /**
+       * Clear state and close modal
+       * on success
+       */
+      setParticipants([]);
+      setUsername("");
+      onClose();
     } catch (error: any) {
       console.log("🚀 onCreateConversation ~ error", error);
       toast.error(error && error.message);
@@ -95,7 +114,11 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
-                <Button type="submit" disabled={!username} isLoading={loading}>
+                <Button
+                  type="submit"
+                  isDisabled={!username}
+                  isLoading={loading}
+                >
                   Search
                 </Button>
               </Stack>

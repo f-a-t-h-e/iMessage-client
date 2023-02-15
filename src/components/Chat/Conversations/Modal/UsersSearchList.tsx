@@ -11,11 +11,6 @@ const UsersSearchList = ({
   users,
   onAddParticipant,
 }: IUsersSearchListProps) => {
-  console.log(
-    "🚀 ~ file: UsersSearchList.tsx:10 ~ UsersSearchList ~ users",
-    users
-  );
-
   return (
     <>
       {users.length === 0 ? (
