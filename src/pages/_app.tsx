@@ -10,7 +10,7 @@ export default function App({
   Component,
   pageProps: { session, ...pageProps },
 }: AppProps) {
-  console.log("🚀 ~ file: _app.tsx:10 ~ session", session);
+  console.log("🚀 ~ file: _app.tsx:10 ~ session", session?.user?.username);
 
   return (
     <ApolloProvider client={graphQLClient}>

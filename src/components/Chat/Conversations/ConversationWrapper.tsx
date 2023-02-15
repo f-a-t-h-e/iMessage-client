@@ -1,11 +1,12 @@
 import { useQuery } from "@apollo/client";
-import { Box } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import React, { useEffect } from "react";
 import ConversationOperations from "@/graphql/operations/conversation";
 import ConversationList from "./ConversationList";
 import { IConversationsData } from "@/utils/types";
 import { useRouter } from "next/router";
+import SkeletonLoader from "../../Common/SkeletonLoader";
 
 type IConversationWrapperProps = {
   session: Session;
@@ -70,6 +71,8 @@ const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  console.log(conversationsLoading);
+
   return (
     <Box
       w={{ base: "100%", md: "400px" }}
@@ -78,12 +81,17 @@ const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
       px="3"
       display={{ base: conversationId ? "none" : "flex", md: "flex" }}
     >
-      {/* Skelton Loader */}
-      <ConversationList
-        session={session}
-        conversations={conversationsData?.conversations || []}
-        onViewConv={onViewConv}
-      />
+      {conversationsLoading ? (
+        <Flex direction="column" w="100%" h="100%" gap="10px">
+          <SkeletonLoader count={5} width="100%" height="80px" />
+        </Flex>
+      ) : (
+        <ConversationList
+          session={session}
+          conversations={conversationsData?.conversations || []}
+          onViewConv={onViewConv}
+        />
+      )}
     </Box>
   );
 };

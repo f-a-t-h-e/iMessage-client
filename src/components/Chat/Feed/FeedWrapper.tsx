@@ -3,6 +3,8 @@ import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import MessagesHeader from "./Messages.tsx/Header";
 import React from "react";
+import MessageInput from "./Messages.tsx/Input";
+import Messages from "./Messages.tsx";
 
 type IFeedWrapperProps = {
   session: Session;
@@ -31,12 +33,12 @@ const FeedWrapper = ({ session }: IFeedWrapperProps) => {
               userId={session.user.id}
               conversationId={conversationId}
             />
-            {/* <Messages
+            <Messages
               userId={session.user.id}
               conversationId={conversationId}
-            /> */}
+            />
           </Flex>
-          {/* <MessageInput session={session} conversationId={conversationId} /> */}
+          <MessageInput session={session} conversationId={conversationId} />
         </>
       ) : (
         <>{"<NoConversationSelected />"}</>

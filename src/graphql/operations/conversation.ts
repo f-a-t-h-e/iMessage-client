@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { MessageFiels } from "./message";
 
 const ConversationFields = /* GraphQL */ `
           id
@@ -11,14 +12,7 @@ const ConversationFields = /* GraphQL */ `
             hasSeenLatestMessage
           }
           latestMessage {
-            id
-            sender {
-              id
-              username
-              image
-            }
-            body
-            createdAt
+            ${MessageFiels}
           }
           updatedAt
 `;
