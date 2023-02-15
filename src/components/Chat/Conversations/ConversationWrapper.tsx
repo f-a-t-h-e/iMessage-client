@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import ConversationOperations from "@/graphql/operations/conversation";
 import ConversationList from "./ConversationList";
 import { IConversationsData } from "@/utils/types";
+import { useRouter } from "next/router";
 
 type IConversationWrapperProps = {
   session: Session;
@@ -19,6 +20,19 @@ const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
   } = useQuery<IConversationsData>(
     ConversationOperations.Queries.conversations
   );
+  const router = useRouter();
+  const {
+    query: { conversationId },
+  } = router;
+  const onViewConv = async (conversationId: string) => {
+    /**
+     * 1. Push the conv id to the router
+     */
+    router.push({ query: { conversationId } });
+    /**
+     * 2. Mark the conv as read
+     */
+  };
 
   const subscribrToNewConversations = () => {
     subscribeToMore({
@@ -53,13 +67,22 @@ const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
    */
   useEffect(() => {
     subscribrToNewConversations();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <Box w={{ base: "100%", md: "400px" }} bg="whiteAlpha.50" py="6" px="3">
+    <Box
+      w={{ base: "100%", md: "400px" }}
+      bg="whiteAlpha.50"
+      py="6"
+      px="3"
+      display={{ base: conversationId ? "none" : "flex", md: "flex" }}
+    >
       {/* Skelton Loader */}
       <ConversationList
         session={session}
         conversations={conversationsData?.conversations || []}
+        onViewConv={onViewConv}
       />
     </Box>
   );

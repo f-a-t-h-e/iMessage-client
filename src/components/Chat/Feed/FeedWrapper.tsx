@@ -1,6 +1,7 @@
 import { Flex, Text } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import { useRouter } from "next/router";
+import MessagesHeader from "./Messages.tsx/Header";
 import React from "react";
 
 type IFeedWrapperProps = {
@@ -12,25 +13,34 @@ const FeedWrapper = ({ session }: IFeedWrapperProps) => {
 
   const { conversationId } = router.query;
 
-  if (conversationId) {
-    return (
-      <Flex
-        justify="center"
-        align="center"
-        display={{ base: "none", md: "flex" }}
-        w="100%"
-      >
-        <Text fontWeight="semibold" userSelect="none">
-          No Conversation selected
-        </Text>
-      </Flex>
-    );
-  }
-
   return (
-    <Flex w="100%" direction="column">
-      <Flex>{conversationId}</Flex>
-      {/* INPUT-BOX */}
+    <Flex
+      w="100%"
+      direction="column"
+      display={{ base: conversationId ? "flex" : "none", md: "flex" }}
+    >
+      {conversationId && typeof conversationId === "string" ? (
+        <>
+          <Flex
+            direction="column"
+            justify="space-between"
+            overflow="hidden"
+            flexGrow={1}
+          >
+            <MessagesHeader
+              userId={session.user.id}
+              conversationId={conversationId}
+            />
+            {/* <Messages
+              userId={session.user.id}
+              conversationId={conversationId}
+            /> */}
+          </Flex>
+          {/* <MessageInput session={session} conversationId={conversationId} /> */}
+        </>
+      ) : (
+        <>{"<NoConversationSelected />"}</>
+      )}
     </Flex>
   );
 };

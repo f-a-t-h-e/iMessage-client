@@ -1,3 +1,4 @@
+import { IConversationPopulated } from "../../../backend/src/utils/types";
 /* USERS */
 export interface CreateUsernameData {
   createUsername: {
@@ -33,4 +34,9 @@ export interface ICreateConversationData {
   createConversation: {
     conversationId: string;
   };
+}
+
+export interface IConversationsData {
+  /** TO_DO */
+  conversations: IConversationPopulated[];
 }
