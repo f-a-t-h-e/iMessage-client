@@ -9,6 +9,7 @@ import MessageOperations from "@/graphql/operations/message";
 import toast from "react-hot-toast";
 import SkeletonLoader from "@/components/Common/SkeletonLoader";
 import { useEffect } from "react";
+import MessageItem from "./MessageItem";
 
 interface IMessagesProps {
   userId: string;
@@ -38,7 +39,6 @@ const Messages = ({ conversationId, userId }: IMessagesProps) => {
         if (!subscriptionData) {
           return prev;
         }
-        console.log("well", subscriptionData);
 
         const newMessage = subscriptionData.data.messageSent;
         return Object.assign({}, prev, {
@@ -53,7 +53,7 @@ const Messages = ({ conversationId, userId }: IMessagesProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
-  console.log("DDDDDD", data);
+
   if (error) {
     toast.error(error.message);
     return (
@@ -81,10 +81,12 @@ const Messages = ({ conversationId, userId }: IMessagesProps) => {
         (data.messages.length !== 0 ? (
           <Flex direction="column-reverse" overflowY="auto" h="100%">
             {data.messages.map((message) => (
-              <div key={message.id}>
-                {message.body}
-                {/* <Message /> */}
-              </div>
+              <MessageItem
+                user={userId}
+                key={message.id}
+                message={message}
+                isSender={message.sender.id === userId}
+              />
             ))}
           </Flex>
         ) : (
