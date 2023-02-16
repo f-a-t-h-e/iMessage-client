@@ -17,15 +17,6 @@ const formatRelativeLocale = {
 };
 
 const MessageItem = ({ user, isSender, message }: IMessageItemProps) => {
-  console.log(
-    "🚀 ~ file: MessageItem.tsx:11 ~ MessageItem ~ user",
-    user,
-    message.sender.id,
-    message.sender.username,
-    isSender
-  );
-
-  console.log(message);
   return (
     <Flex
       direction={isSender ? "row-reverse" : "row"}

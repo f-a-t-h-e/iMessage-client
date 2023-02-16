@@ -4,7 +4,7 @@ import { Session } from "next-auth";
 import { FormEvent, useRef } from "react";
 import { toast } from "react-hot-toast";
 import MessageOperations from "@/graphql/operations/message";
-import { ISendMessageInput } from "../../../../utils/types";
+import { IMessagesData, ISendMessageInput } from "@/utils/types";
 
 interface IMessageInputProps {
   session: Session;
@@ -37,6 +37,30 @@ const MessageInput = ({ conversationId, session }: IMessageInputProps) => {
           body,
           conversationId,
         },
+        /**
+         * TO_DO : Allow instant message flow properly
+         * try not to create the message at the client side
+         */
+        // optimisticResponse: {
+        //   sendMessage: true,
+        // },
+        // update: (cache) => {
+        //   const existing = cache.readQuery<IMessagesData>({
+        //     query: MessageOperations.Queries.messages,
+        //     variables: { conversationId },
+        //   }) || {
+        //     messages: [],
+        //   };
+
+        //   cache.writeQuery<IMessagesData, { conversationId: string }>({
+        //     query: MessageOperations.Queries.messages,
+        //     variables: { conversationId },
+        //     data: {
+        //       ...existing,
+        //       messages: [{}, ...existing.messages],
+        //     },
+        //   });
+        // },
       });
       if (!data?.sendMessage || errors) {
         errors?.forEach((error) => toast.error(error.message));

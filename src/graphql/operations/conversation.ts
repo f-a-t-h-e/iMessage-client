@@ -35,6 +35,11 @@ const ConversationOperations = {
         }
       }
     `,
+    markConvAsRead: gql`
+      mutation OnMarkConvAsRead($conversationId: String!) {
+        markConvAsRead(conversationId: $conversationId)
+      }
+    `,
   },
   Subscriptions: {
     conversationCreated: gql`
@@ -43,6 +48,15 @@ const ConversationOperations = {
           ${ConversationFields}
         }
       }
+    `,
+    conversationUpdated: gql`
+        subscription ConversationUpdated {
+          conversationUpdated {
+            conversation {
+              ${ConversationFields}
+            }
+          }
+        }
     `,
   },
 };

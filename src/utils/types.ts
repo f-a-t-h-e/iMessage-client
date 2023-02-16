@@ -44,6 +44,12 @@ export interface IConversationsData {
   conversations: IConversationPopulated[];
 }
 
+export interface IConversationUpdatedSubPayload {
+  conversationUpdated: {
+    conversation: IConversationPopulated;
+  };
+}
+
 /**
  * MESSAGES
  */

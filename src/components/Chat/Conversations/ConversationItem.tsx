@@ -27,13 +27,14 @@ const formatRelativeLocale = {
 
 interface IConversationItemProps {
   userId: string;
-  /* NOTE : I'm trying to avoid importing the type from the backend folder
+  /**
+   * NOTE : I'm trying to avoid importing the type from the backend folder
    * again so I can solve it in one place only
    */
   conversation: IConversationsData["conversations"][number];
   onClick: () => void;
   isSelected: boolean;
-  // hasSeenLatestMessage: boolean | undefined;
+  hasSeenLatestMessage: boolean | undefined;
   // onDeleteConversation: (conversationId: string) => void;
   //   onEditConversation?: () => void;
   //   hasSeenLatestMessage?: boolean;
@@ -46,7 +47,7 @@ const ConversationItem: React.FC<IConversationItemProps> = ({
   conversation,
   onClick,
   isSelected,
-  // hasSeenLatestMessage,
+  hasSeenLatestMessage,
   // onDeleteConversation,
   //   selectedConversationId,
   //   onEditConversation,
@@ -125,9 +126,9 @@ const ConversationItem: React.FC<IConversationItemProps> = ({
         </MenuList>
       </Menu>
       <Flex position="absolute" left="-6px">
-        {/*hasSeenLatestMessage === false && (
+        {hasSeenLatestMessage === false && (
           <GoPrimitiveDot fontSize={18} color="#6B46C1" />
-        )*/}
+        )}
       </Flex>
       <Avatar />
       <Flex justify="space-between" width="80%" height="100%">

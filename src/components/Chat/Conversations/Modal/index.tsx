@@ -39,6 +39,7 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
     ISearchUserData,
     ISearchUserInput
   >(UserOperations.Queries.searchUsers);
+
   const [createConversation, { loading: isCreateloading }] = useMutation<
     ICreateConversationData,
     ICreateConversationInput
@@ -46,7 +47,7 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
 
   const router = useRouter();
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     // searchUsers query
     e.preventDefault();
 
@@ -107,7 +108,7 @@ const ConversationModal = ({ isOpen, onClose }: IModalProps) => {
           <ModalHeader>Create a conversation</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <form onSubmit={onSubmit}>
+            <form onSubmit={onSearch}>
               <Stack spacing={4}>
                 <Input
                   placeholder="Enter a username"

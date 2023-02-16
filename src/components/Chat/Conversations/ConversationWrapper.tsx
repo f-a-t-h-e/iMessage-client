@@ -1,38 +1,143 @@
-import { useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import { Box, Flex } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import React, { useEffect } from "react";
 import ConversationOperations from "@/graphql/operations/conversation";
 import ConversationList from "./ConversationList";
-import { IConversationsData } from "@/utils/types";
+import {
+  IConversationsData,
+  IConversationUpdatedSubPayload,
+} from "@/utils/types";
 import { useRouter } from "next/router";
 import SkeletonLoader from "../../Common/SkeletonLoader";
+import { toast } from "react-hot-toast";
+import { IParticipantPopulated } from "../../../../../backend/src/utils/types";
 
 type IConversationWrapperProps = {
   session: Session;
 };
 
 const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
+  const router = useRouter();
+  const {
+    query: { conversationId },
+  } = router;
+
   const {
     data: conversationsData,
     error: conversationsError,
     loading: conversationsLoading,
     subscribeToMore,
   } = useQuery<IConversationsData>(
-    ConversationOperations.Queries.conversations
+    ConversationOperations.Queries.conversations,
+    {
+      onError: ({ message }) => {
+        toast.error(message);
+      },
+      fetchPolicy: "cache-first",
+    }
   );
-  const router = useRouter();
-  const {
-    query: { conversationId },
-  } = router;
-  const onViewConv = async (conversationId: string) => {
+
+  useEffect(() => {
+    console.log("CHANGE", conversationsData?.conversations[1]);
+  }, [conversationsData]);
+
+  const [markAsRead, { data }] = useMutation<
+    { markConvAsRead: boolean },
+    { conversationId: string }
+  >(ConversationOperations.Mutations.markConvAsRead);
+
+  useSubscription<IConversationUpdatedSubPayload, never>(
+    ConversationOperations.Subscriptions.conversationUpdated,
+    {
+      onData: ({ data: { data, loading, error, variables }, client }) => {
+        const updatedConv = data?.conversationUpdated?.conversation;
+        if (!updatedConv) return;
+
+        const isSeen = (updatedConv.id as string) === conversationId;
+
+        if (isSeen) {
+          onViewConv(conversationId, false);
+        }
+      },
+    }
+  );
+
+  const onViewConv = async (
+    conversationId: string,
+    hasSeenLatestMessage: boolean | undefined
+  ) => {
     /**
      * 1. Push the conv id to the router
      */
     router.push({ query: { conversationId } });
     /**
-     * 2. Mark the conv as read
+     * 2. Mark the conv as read if it's not
      */
+    if (hasSeenLatestMessage) return;
+
+    try {
+      await markAsRead({
+        variables: {
+          conversationId,
+        },
+        optimisticResponse: {
+          markConvAsRead: true,
+        },
+        update: (cache) => {
+          const participantsFregmant = cache.readFragment<{
+            participants: IParticipantPopulated[];
+          }>({
+            id: `Conversation:${conversationId}`,
+            fragment: gql`
+              fragment Participants on Conversation {
+                participants {
+                  user {
+                    id
+                    username
+                  }
+                  hasSeenLatestMessage
+                }
+              }
+            `,
+          });
+
+          if (!participantsFregmant) return;
+
+          const participants = [...participantsFregmant.participants];
+
+          const partiIndex = participants.findIndex(
+            (parti) => parti.user.id === session.user.id
+          );
+          if (partiIndex === -1) return;
+
+          participants[partiIndex] = {
+            ...participants[partiIndex],
+            hasSeenLatestMessage: true,
+          };
+
+          /**
+           * Update chache
+           */
+          cache.writeFragment({
+            id: `Conversation:${conversationId}`,
+            fragment: gql`
+              fragment UpdatedParticipants on Conversation {
+                participants
+              }
+            `,
+            data: { participants },
+          });
+          //
+        },
+        refetchQueries: [
+          { query: ConversationOperations.Queries.conversations },
+        ],
+      });
+    } catch (error: any) {
+      console.log("on view conversation error", error);
+      toast.error(error.message);
+    }
   };
 
   const subscribrToNewConversations = () => {
@@ -71,7 +176,11 @@ const ConversationWrapper = ({ session }: IConversationWrapperProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  console.log(conversationsLoading);
+
+  if (conversationsError) {
+    toast.error("There was an error fetching conversations");
+    return null;
+  }
 
   return (
     <Box

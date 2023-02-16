@@ -10,7 +10,10 @@ import { useRouter } from "next/router";
 type IConversationListProps = {
   session: Session;
   conversations: IConversationsData["conversations"];
-  onViewConv: (conversationId: string) => Promise<void>;
+  onViewConv: (
+    conversationId: string,
+    hasSeenLatestMessage: boolean
+  ) => Promise<void>;
 };
 
 const ConversationList = ({
@@ -43,15 +46,24 @@ const ConversationList = ({
         </Text>
       </Box>
       <ConversationModal isOpen={isModalOpen} onClose={onModalClose} />
-      {conversations.map((conversation) => (
-        <ConversationItem
-          key={conversation.id}
-          userId={userId}
-          conversation={conversation}
-          onClick={() => onViewConv(conversation.id)}
-          isSelected={conversation.id === router.query.conversationId}
-        />
-      ))}
+      {[...conversations]
+        .sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())
+        .map((conversation) => {
+          const hasSeenLatestMessage = conversation.participants.find(
+            (parti) => parti.user.id === userId
+          )?.hasSeenLatestMessage;
+
+          return (
+            <ConversationItem
+              key={conversation.id}
+              hasSeenLatestMessage={hasSeenLatestMessage}
+              userId={userId}
+              conversation={conversation}
+              onClick={() => onViewConv(conversation.id, hasSeenLatestMessage)}
+              isSelected={conversation.id === router.query.conversationId}
+            />
+          );
+        })}
     </Box>
   );
 };
